@@ -20,8 +20,9 @@ if not TOKEN:
 
 bot = Bot(token=TOKEN)
 
-# ---- База данных ----
-conn = sqlite3.connect("db.db", check_same_thread=False)
+# ---- База данных (путь можно переопределить) ----
+DB_PATH = os.environ.get("DB_PATH", "db.db")
+conn = sqlite3.connect(DB_PATH, check_same_thread=False)
 cursor = conn.cursor()
 db_lock = threading.Lock()
 
@@ -102,7 +103,7 @@ async def handle_message(message: Message):
     is_user_admin = await is_admin(chat_id, user_id)
     now_ts = int(time.time())
 
-    # ---- Всегда добавляем/обновляем пользователя в БД (для недельных отчётов) ----
+    # ---- Всегда добавляем/обновляем пользователя в БД ----
     with db_lock:
         cursor.execute(
             "INSERT INTO users (id, chat_id, username, last_active) VALUES (?, ?, ?, ?) "
@@ -111,7 +112,7 @@ async def handle_message(message: Message):
         )
         conn.commit()
 
-    # ---- Удаление сообщений в нерабочее время (выходные) ----
+    # ---- Удаление сообщений в нерабочее время ----
     if not is_work_time(message.date):
         if not is_user_admin:
             try:
@@ -259,7 +260,7 @@ async def handle_callback(event: Callback):
 
     await event.answer("Засчитано ✅")
 
-# ---------- Планировщик (сброс счётчиков, отчёты) ----------
+# ---------- Планировщик ----------
 def scheduler():
     weekly_reported = set()
     friday_notified = set()
@@ -405,7 +406,7 @@ def scheduler():
 
         time.sleep(60)
 
-# ---------- Health-сервер для Bothost ----------
+# ---------- Health-сервер ----------
 class HealthHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
