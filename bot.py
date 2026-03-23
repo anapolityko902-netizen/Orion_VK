@@ -93,6 +93,7 @@ async def is_admin(chat_id, user_id):
 
 # ---- Обработчик сообщений ----
 @bot.on.message()
+print(f"🔔 Новое сообщение от {message.from_id}: {message.text}")
 async def handle_message(message: Message):
     if not message.text:
         return
