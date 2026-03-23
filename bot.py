@@ -91,9 +91,13 @@ async def is_admin(chat_id, user_id):
     except Exception:
         return False
 
+# ---- Диагностический обработчик всех событий (временно) ----
+@bot.on.raw_event()
+async def log_all_events(event):
+    print(f"🔔 Получено событие: {type(event)}")
+
 # ---- Обработчик сообщений ----
 @bot.on.message()
-print(f"🔔 Новое сообщение от {message.from_id}: {message.text}")
 async def handle_message(message: Message):
     if not message.text:
         return
@@ -425,9 +429,8 @@ if __name__ == "__main__":
     threading.Thread(target=run_health_server, daemon=True).start()
     threading.Thread(target=scheduler, daemon=True).start()
     print("Бот VK запущен...")
-
-@bot.on.raw_event()
-async def log_all_events(event):
-    print(f"🔔 Получено событие: {type(event)}")
-   
-    bot.run_forever()
+    try:
+        bot.run_forever()
+    except Exception as e:
+        print(f"❌ Ошибка при запуске бота: {e}")
+        raise
