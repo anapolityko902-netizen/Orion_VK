@@ -425,4 +425,11 @@ if __name__ == "__main__":
     threading.Thread(target=run_health_server, daemon=True).start()
     threading.Thread(target=scheduler, daemon=True).start()
     print("Бот VK запущен...")
+   async def test():
+    try:
+        convs = await bot.api.messages.get_conversations(count=1)
+        print("✅ Бот успешно получил список бесед:", convs)
+    except Exception as e:
+        print("❌ Ошибка доступа:", e)
+
     bot.run_forever()
